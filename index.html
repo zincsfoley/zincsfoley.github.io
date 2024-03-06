@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Clock</title>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+body {
+  overflow: hidden;
+}
+
+body {
+  background-color: black;
+  color: white;
+  font-family: Verdana;
+}
+</style>
+</head>
+<body>
+
+<div id="clock" style="height: 100%; display: flex; align-items: center; justify-content: center; font-size: 48px"></div>
+
+<script type="module">
+
+function ch (n, p) {
+  return `${n}`.padStart(p, '0');
+}
+
+const days = 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.split(' ');
+const months = 'January February March April May June July August September October Novermber December'.split(' ');
+const shortDays = 'Mon Tue Wed Thu Fri Sat Sun'.split(' ');
+const shortMonths = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+
+const clockElem = document.querySelector('#clock');
+
+function update () {
+  const now = new Date();
+  clock.innerHTML = (function () {
+    const Y = ch(now.getFullYear(), 4);
+    const m = ch(now.getMonth() + 1, 2);
+    const d = ch(now.getDate(), 2);
+    const H = ch(now.getHours(), 2);
+    const M = ch(now.getMinutes(), 2);
+    const S = ch(now.getSeconds(), 2);
+    const ms = ch(now.getMilliseconds(), 3);
+
+    const a = shortDays[now.getDay()];
+    const b = shortMonths[now.getMonth()];
+    const e = now.getDate();
+    let l = now.getHours() % 12; l = l == 0 ? 12 : l;
+    const p = now.getHours() < 12 ? 'AM' : 'PM';
+
+    return `${l}:${M} ${p}`;
+  })();
+  return now;
+}
+
+(async function () {
+  const n = 1000 * 60;  // minutes
+  while (true) {
+    const now = update().getTime();
+    const next = Math.ceil(now / n) * n;
+    await new Promise(r => setTimeout(r, Math.max(0, next - now)));
+  }
+})();
+
+</script>
+
+</body>
+</html>
