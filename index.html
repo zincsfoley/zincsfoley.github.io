@@ -32,17 +32,18 @@ body {
     font-size: 48px;
     box-sizing: border-box;
     padding-bottom: 24px;
+    white-space: pre-wrap;
   "
 ></div>
 
 <script type="module">
 
-function ch (n, p) {
+function npad (n, p) {
   return `${n}`.padStart(p, '0');
 }
 
 const days = 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.split(' ');
-const months = 'January February March April May June July August September October Novermber December'.split(' ');
+const months = 'January February March April May June July August September October November December'.split(' ');
 const shortDays = 'Mon Tue Wed Thu Fri Sat Sun'.split(' ');
 const shortMonths = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
@@ -51,13 +52,13 @@ const clockElem = document.querySelector('#clock');
 function update () {
   const now = new Date();
   clock.innerHTML = (function () {
-    const Y = ch(now.getFullYear(), 4);
-    const m = ch(now.getMonth() + 1, 2);
-    const d = ch(now.getDate(), 2);
-    const H = ch(now.getHours(), 2);
-    const M = ch(now.getMinutes(), 2);
-    const S = ch(now.getSeconds(), 2);
-    const ms = ch(now.getMilliseconds(), 3);
+    const Y = npad(now.getFullYear(), 4);
+    const m = npad(now.getMonth() + 1, 2);
+    const d = npad(now.getDate(), 2);
+    const H = npad(now.getHours(), 2);
+    const M = npad(now.getMinutes(), 2);
+    const S = npad(now.getSeconds(), 2);
+    const ms = npad(now.getMilliseconds(), 3);
 
     const a = shortDays[now.getDay()];
     const b = shortMonths[now.getMonth()];
@@ -65,7 +66,7 @@ function update () {
     let l = now.getHours() % 12; l = l == 0 ? 12 : l;
     const p = now.getHours() < 12 ? 'AM' : 'PM';
 
-    return `${l}:${M} ${p}`;
+    return `${a}, ${b} ${e} @ ${l}:${M} ${p}`;
   })();
   return now;
 }
