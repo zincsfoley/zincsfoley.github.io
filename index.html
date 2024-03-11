@@ -64,7 +64,7 @@ function update () {
     const a = shortDays[now.getDay()];
     const b = shortMonths[now.getMonth()];
     const e = now.getDate();
-    let l = now.getHours() % 12; l = l == 0 ? 12 : l;
+    const l = now.getHours() % 12 === 0 ? 12 : now.getHours();
     const p = now.getHours() < 12 ? 'AM' : 'PM';
 
     return `${a}, ${b} ${e} @ ${l}:${M} ${p}`;
