@@ -52,7 +52,7 @@ const clockElem = document.querySelector('#clock');
 
 function update () {
   const now = new Date();
-  clock.innerHTML = (function () {
+  clockElem.innerHTML = (function () {
     const Y = npad(now.getFullYear(), 4);
     const m = npad(now.getMonth() + 1, 2);
     const d = npad(now.getDate(), 2);
