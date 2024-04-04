@@ -67,9 +67,10 @@ function update () {
     const b = shortMonths[now.getMonth()];
     const e = now.getDate();
     const l = now.getHours() % 12 === 0 ? 12 : now.getHours() % 12;
-    const p = now.getHours() < 12 ? 'am' : 'pm';
+    const p = now.getHours() < 12 ? 'AM' : 'PM';
+    const P = now.getHours() < 12 ? 'am' : 'pm';
 
-    return `${a}, ${b} ${e} @ ${l}:${M} ${p}`;
+    return `${a}, ${b} ${e} @ ${l}:${M} ${P}`;
   })();
   return now;
 }
