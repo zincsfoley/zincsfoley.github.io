@@ -17,8 +17,8 @@ body {
 */
 
 body {
-  background-color: black;
-  color: white;
+  background-color: #101010;
+  color: #e0e0e0;
   font-family: Verdana;
 }
 </style>
@@ -94,14 +94,14 @@ const button = {
   update () {
     Object.assign(this.elem.style, this.active
       ? {
-        outline: '2px solid #eee',
-        backgroundColor: '#888',
+        outline: '4px solid #e0e0e0',
+        backgroundColor: '#707070',
         borderRadius: '12px',
       }
       : {
-        outline: 'none',
-        backgroundColor: 'transparent',
-        borderRadius: '',
+        outline: '4px solid #808080',
+        backgroundColor: '',
+        borderRadius: '12px',
       }
     );
   },
