@@ -92,20 +92,18 @@ const button = {
   active: false,
   elem: document.querySelector('#button'),
   update () {
-    if (this.active) {
-      Object.assign(this.elem.style, {
+    Object.assign(this.elem.style, this.active
+      ? {
         outline: '2px solid #eee',
         backgroundColor: '#888',
         borderRadius: '12px',
-      });
-    }
-    else {
-      Object.assign(this.elem.style, {
+      }
+      : {
         outline: 'none',
         backgroundColor: 'transparent',
         borderRadius: '',
-      });
-    }
+      }
+    );
   },
 };
 button.elem.onclick = (ev) => {
