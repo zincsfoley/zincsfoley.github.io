@@ -95,7 +95,9 @@ const button = {
     Object.assign(this.elem.style, this.active
       ? {
         outline: '4px solid #e0e0e0',
-        backgroundColor: '#707070',
+        // If instead of the coffee cup emoji we had text, we would probably
+        // want `backgroundColor` to be `#505050` (looks nicer)
+        backgroundColor: '#606060',
         borderRadius: '12px',
       }
       : {
