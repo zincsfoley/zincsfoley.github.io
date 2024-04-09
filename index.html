@@ -17,8 +17,8 @@ body {
 */
 
 body {
-  background-color: black;
-  color: white;
+  background-color: #101010;
+  color: #e0e0e0;
   font-family: Verdana;
 }
 </style>
@@ -26,18 +26,21 @@ body {
 <body>
 
 <div
-  id="clock"
+  id="container"
   style="
     height: 100%;
     display: flex;
-    justify-content: center;  /* horizontal */
+    justify-content: flex-start;  /* horizontal */
     align-items: flex-start;  /* vertical */
     box-sizing: border-box;
     white-space: pre-wrap;
     font-size: 48px;
     padding: 24px;
   "
-></div>
+>
+  <div id="clock" style="flex: 1; line-height: 1; padding: 8px"></div>
+  <div id="button" style="line-height: 1; padding: 8px; cursor: pointer; user-select: none">&#9749;</div>
+</div>
 
 <script type="module">
 
@@ -76,13 +79,38 @@ function update () {
 }
 
 (async function () {
-  const n = 1000 * 60;  // minutes
+  const n = 1000 * 80;  // minutes
   while (true) {
     const now = update().getTime();
     const next = Math.ceil(now / n) * n;
     await new Promise(r => setTimeout(r, Math.max(0, next - now)));
   }
 })();
+
+
+const button = {
+  active: false,
+  elem: document.querySelector('#button'),
+  update () {
+    Object.assign(this.elem.style, this.active
+      ? {
+        outline: '4px solid #e0e0e0',
+        backgroundColor: '#707070',
+        borderRadius: '12px',
+      }
+      : {
+        outline: '4px solid #808080',
+        backgroundColor: '',
+        borderRadius: '12px',
+      }
+    );
+  },
+};
+button.elem.onclick = (ev) => {
+  button.active = !button.active;
+  button.update();
+};
+button.update();
 
 </script>
 
