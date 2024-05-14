@@ -39,7 +39,6 @@ body {
   "
 >
   <div id="clock" style="flex: 1; line-height: 1; padding: 8px"></div>
-  <div id="button" style="line-height: 1; padding: 8px; cursor: pointer; user-select: none">&#9749;</div>
 </div>
 
 <script type="module">
@@ -86,36 +85,6 @@ function update () {
     await new Promise(r => setTimeout(r, Math.max(0, next - now)));
   }
 })();
-
-
-const button = {
-  active: false,
-  elem: document.querySelector('#button'),
-  update () {
-    Object.assign(this.elem.style, this.active
-      ? {
-        outline: '4px solid #10e010',
-        // If instead of the coffee cup emoji we had text, we would probably
-        // want `backgroundColor` to be `#505050` (looks nicer)
-        backgroundColor: '#108010',
-        borderRadius: '12px',
-      }
-      : {
-        // Maybe this color should be #707070? it's just a TINY bit hard to
-        // distinguish between deactivated and activated, because it feels so
-        // bright. Will have to try it out for a bit though
-        outline: '4px solid #e0e0e0',
-        backgroundColor: '',
-        borderRadius: '12px',
-      }
-    );
-  },
-};
-button.elem.onclick = (ev) => {
-  button.active = !button.active;
-  button.update();
-};
-button.update();
 
 </script>
 
