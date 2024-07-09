@@ -78,7 +78,7 @@ function update () {
 }
 
 (async function () {
-  const n = 1000 * 80;  // minutes
+  const n = 1000 * 60;  // minutes
   while (true) {
     const now = update().getTime();
     const next = Math.ceil(now / n) * n;
