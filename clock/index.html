@@ -2,91 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<link rel="icon" type="image/png" href="data:image/png;base64," />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 <title>Clock</title>
-<link rel="icon" type="image/png" href="png/icon.png" />
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-/*
-body {
-  overflow: hidden;
-}
-*/
-
-body {
-  background-color: #101010;
-  color: #e0e0e0;
-  font-family: Verdana;
-}
-</style>
 </head>
 <body>
 
-<div
-  id="container"
-  style="
-    height: 100%;
-    display: flex;
-    justify-content: flex-start;  /* horizontal */
-    align-items: flex-start;  /* vertical */
-    box-sizing: border-box;
-    white-space: pre-wrap;
-    font-size: 48px;
-    padding: 24px;
-  "
->
-  <div id="clock" style="flex: 1; line-height: 1; padding: 8px"></div>
-</div>
+<h1>Clock</h1>
 
-<script type="module">
-
-function npad (n, p) {
-  return `${n}`.padStart(p, '0');
-}
-
-const days = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
-const months = 'January February March April May June July August September October November December'.split(' ');
-const shortDays = 'Sun Mon Tue Wed Thu Fri Sat'.split(' ');
-const shortMonths = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
-
-const clockElem = document.querySelector('#clock');
-
-function update () {
-  const now = new Date();
-  clockElem.innerHTML = (function () {
-    const Y = npad(now.getFullYear(), 4);
-    const m = npad(now.getMonth() + 1, 2);
-    const d = npad(now.getDate(), 2);
-    const H = npad(now.getHours(), 2);
-    const M = npad(now.getMinutes(), 2);
-    const S = npad(now.getSeconds(), 2);
-    const ms = npad(now.getMilliseconds(), 3);
-
-    const a = shortDays[now.getDay()];
-    const b = shortMonths[now.getMonth()];
-    const e = now.getDate();
-    const l = now.getHours() % 12 === 0 ? 12 : now.getHours() % 12;
-    const p = now.getHours() < 12 ? 'AM' : 'PM';
-    const P = now.getHours() < 12 ? 'am' : 'pm';
-
-    return `${a}, ${b} ${e}, ${l}:${M} ${P}`;
-  })();
-  return now;
-}
-
-(async function () {
-  const n = 1000 * 60;  // minutes
-  while (true) {
-    const now = update().getTime();
-    const next = Math.ceil(now / n) * n;
-    await new Promise(r => setTimeout(r, Math.max(0, next - now)));
-  }
-})();
-
-</script>
+<p>This used to be <code>clock</code>, but not anymore.</p>
 
 </body>
 </html>
