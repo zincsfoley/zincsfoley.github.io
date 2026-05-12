@@ -4,6 +4,13 @@
 <meta charset="utf-8" />
 <title>Clock</title>
 <link rel="icon" type="image/png" href="png/icon.png" />
+<!--{-->
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="theme-color" content="black" />
+<link rel="apple-touch-icon" href="png/icon.png" />
+<!--}-->
 <style>
 html, body {
   margin: 0;
@@ -29,14 +36,17 @@ body, * {
 </head>
 <body>
 
-<div id="clock" style="
-  white-space: pre;
-  font-size: 48px;
-"></div>
-<div style="height: 96px"></div>
-<div id="cal" style="
-  font-size: 24px;
-"></div>
+<div style="display: flex; flex-direction: row; justify-content: center"><div>
+  <div id="clock" style="
+    white-space: pre;
+    font-size: 48px;
+  "></div>
+  <div style="height: 96px"></div>
+  <div id="cal" style="
+    font-size: 24px;
+  "></div>
+  <div>
+</div></div>
 
 <script>
 function Markup (html) {
@@ -186,12 +196,15 @@ clockElem.onclick = () => {
 };
 
 function renderClock (now) {
-  const html = strftime(now, ({a, b, e, l, M, S, P}) => `${a}, ${b} ${e}, ${l}:${M}${showSeconds ? `<span style="font-size: 24px">:${S}</span>` : ''} ${P}`);
+  const html           = strftime(now, ({a, b, e, l, M, S, P}) => `${a}, ${b} ${e}, ${l}:${M}${showSeconds ? `<span style="font-size: 24px">:${S}</span>` : ''} ${P}`);
+  const withoutSeconds = strftime(now, ({a, b, e, l, M, S, P}) => `${a}, ${b} ${e}, ${l}:${M}${                                                             ''} ${P}`);
   if (clockElem.dataset.cacheKey === html) {
     return;
   }
   clockElem.dataset.cacheKey = html;
 
+  clockElem.innerHTML = withoutSeconds;
+  clockElem.style.width = `${clockElem.getBoundingClientRect().width}px`;
   clockElem.innerHTML = html;
 }
 
