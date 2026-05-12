@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Clock</title>
+<link rel="icon" type="image/png" href="png/icon.png" />
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+body {
+  padding: 24px;
+  box-sizing: border-box;
+  overflow: hidden;  /* hax */
+}
+
+body {
+  background-color: #101010;
+  color: #e0e0e0;
+  font-family: Verdana;
+}
+
+body, * {
+  user-select: none !important;
+}
+</style>
+</head>
+<body>
+
+<div id="clock" style="
+  white-space: pre;
+  font-size: 48px;
+"></div>
+<div style="height: 96px"></div>
+<div id="cal" style="
+  font-size: 24px;
+"></div>
+
+<script>
+function Markup (html) {
+  return {
+    __type__: 'markup',
+    html,
+  };
+}
+
+
+function appendChildren (elem, ...children) {
+  children.forEach(child => {
+    if (child === null || child === undefined) {
+      return;
+    }
+    else if (Array.isArray(child)) {
+      appendChildren(elem, ...child);
+    }
+    else {
+      switch (child.__type__) {
+        case 'markup':
+          elem.innerHTML += child.html;
+          break;
+        case undefined:
+          elem.append(child);
+          break;
+        default:
+          throw new Error(`Invalid __type__: ${elem.__type__}`);
+      }
+    }
+  });
+}
+
+
+function setChildren (elem, ...children) {
+  elem.innerHTML = '';
+  appendChildren(elem, ...children);
+}
+
+
+function ce (tag, attrs={}, ...children) {
+  const elem = document.createElement(tag);
+  for (const [name, value] of Object.entries(attrs)) {
+    if (name === 'style' && typeof(value) === 'object') {
+      Object.assign(elem.style, value);
+    }
+    else if (name.startsWith('on') && typeof(value) === 'function') {
+      elem[name] = value;
+    }
+    else {
+      elem.setAttribute(name, value);
+    }
+  }
+  appendChildren(elem, ...children);
+  return elem;
+}
+</script>
+
+<script type="module">
+
+// lib
+
+function newUtc (uts) {
+  const dt = new Date(uts);
+  dt.tz = 'UTC';
+  return dt;
+}
+
+function newLocal () {
+  const dt = new Date();
+  dt.tz = '';
+  return dt;
+}
+
+function getTz (dt) {
+  if (dt.tz === undefined) {
+    throw new Error('Date must be timezone-aware');
+  }
+  return dt.tz;
+}
+
+
+function npad (n, p) {
+  return `${n}`.padStart(p, '0');
+}
+
+function goodmod (n, base) {
+  let retval = n % base;
+  if (retval < 0) {
+    retval += base;
+  }
+  return retval;
+}
+
+function setToFirstOfMonth (dt) {
+  const tz = getTz(dt);
+  dt[`set${tz}Date`](1);
+  dt[`set${tz}Hours`](0);
+  dt[`set${tz}Minutes`](0);
+  dt[`set${tz}Seconds`](0);
+  dt[`set${tz}Milliseconds`](0);
+  return dt;
+}
+
+function range (n) {
+  return [...Array(n).keys()];
+}
+
+const weekdays = 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.split(' ');
+const months = 'January February March April May June July August September October November December'.split(' ');
+const shortWeekdays = weekdays.map(day => day.substring(0, 3));
+const shortMonths = months.map(day => day.substring(0, 3));
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function strftime (dt, formatter) {
+  const tz = getTz(dt);
+  return formatter({
+    Y: npad(dt[`get${tz}FullYear`](), 4),
+    m: npad(dt[`get${tz}Month`]() + 1, 2),
+    d: npad(dt[`get${tz}Date`](), 2),
+    H: npad(dt[`get${tz}Hours`](), 2),
+    M: npad(dt[`get${tz}Minutes`](), 2),
+    S: npad(dt[`get${tz}Seconds`](), 2),
+    ms: npad(dt[`get${tz}Milliseconds`](), 3),
+
+    A:      weekdays[goodmod(dt[`get${tz}Day`]() - 1, 7)],
+    a: shortWeekdays[goodmod(dt[`get${tz}Day`]() - 1, 7)],
+    B:        months[dt[`get${tz}Month`]()],
+    b: shortMonths[dt[`get${tz}Month`]()],
+    e: dt[`get${tz}Date`](),
+    l: dt[`get${tz}Hours`]() % 12 === 0 ? 12 : dt[`get${tz}Hours`]() % 12,
+    p: dt[`get${tz}Hours`]() < 12 ? 'AM' : 'PM',
+    P: dt[`get${tz}Hours`]() < 12 ? 'am' : 'pm',
+  });
+}
+
+
+// main
+
+
+const clockElem = document.querySelector('#clock');
+let showSeconds = false;
+
+clockElem.onclick = () => {
+  showSeconds = !showSeconds;
+  renderClock(newLocal());
+};
+
+function renderClock (now) {
+  const html = strftime(now, ({a, b, e, l, M, S, P}) => `${a}, ${b} ${e}, ${l}:${M}${showSeconds ? `<span style="font-size: 24px">:${S}</span>` : ''} ${P}`);
+  if (clockElem.dataset.cacheKey === html) {
+    return;
+  }
+  clockElem.dataset.cacheKey = html;
+
+  clockElem.innerHTML = html;
+}
+
+
+const calElem = document.querySelector('#cal');
+let calPrev = null;
+let calNext = null;
+let calReset = null;
+let calYearPrev = null;
+let calYearNext = null;
+let monthOfInterest = null;
+
+function renderCal (now) {
+  const cacheKey = strftime(now, ({Y, m, d}) => `${Y}-${m}-${d}`);
+  if (calElem.dataset.cacheKey === cacheKey) {
+    return;
+  }
+  calElem.dataset.cacheKey = cacheKey;
+  _renderCal(now);
+}
+
+function _renderCal (now) {
+  const monthify = (dt) => strftime(dt, ({Y, m}) => `${Y}-${m}`);
+  const dateify = (dt) => strftime(dt, ({Y, m, d}) => `${Y}-${m}-${d}`);
+  const cellWidth = 75;
+  const cellHeight = 59;
+
+  const nowUtc = newUtc(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+
+  const firstOfMonth = monthOfInterest ?? setToFirstOfMonth(newUtc(+nowUtc));
+  const lastOfMonth = (function () {
+    const middleOfNextMonth = newUtc(+firstOfMonth + 45 * MS_PER_DAY);
+    const firstOfNextMonth = setToFirstOfMonth(middleOfNextMonth);
+    return newUtc(+firstOfNextMonth - MS_PER_DAY);
+  })();
+  const start = newUtc(+firstOfMonth - goodmod(firstOfMonth.getUTCDay() - 1, 7) * MS_PER_DAY);
+  const numWeeks = Math.floor((+lastOfMonth - +start) / MS_PER_DAY / 7) + 1;
+
+  calPrev = () => {
+    monthOfInterest = setToFirstOfMonth(newUtc(+firstOfMonth - MS_PER_DAY));
+    _renderCal(now);
+  };
+  calNext = () => {
+    monthOfInterest = newUtc(+lastOfMonth + MS_PER_DAY);
+    _renderCal(now);
+  }
+  calReset = () => {
+    monthOfInterest = null;
+    _renderCal(now);
+  };
+  calYearPrev = () => {
+    monthOfInterest = setToFirstOfMonth(newUtc(+firstOfMonth - (365 - 10) * MS_PER_DAY));
+    _renderCal(now);
+  };
+  calYearNext = () => {
+    monthOfInterest = setToFirstOfMonth(newUtc(+firstOfMonth + (365 + 10) * MS_PER_DAY));
+    _renderCal(now);
+  }
+
+  const tdStyle = (j) => ({width: `${cellHeight}px`, ...j === 5 ? {borderLeft: '1px solid #666'} : {}});
+  const buttonStyle = {cursor: 'pointer', display: 'inline-block', textAlign: 'center'};
+  setChildren(calElem, [
+    ce('div', {
+      style: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        width: `${cellWidth * 7 + 1}px`,
+        paddingLeft: '24px',
+        paddingRight: '24px',
+        boxSizing: 'border-box',
+        textAlign: 'center',
+      },
+    },
+      ce('a', {
+        style: {
+          ...buttonStyle,
+          width: '32px',
+        },
+        onclick: calPrev,
+      },
+        '\u276e',
+      ),
+      ce('a', {
+        style: {
+          flex: '1',
+        },
+      },
+        ce('span', {
+          style: {
+            ...buttonStyle,
+            ...monthOfInterest ? {fontStyle: 'italic'} : {},
+          },
+          onclick: calReset,
+        },
+          strftime(firstOfMonth, ({Y, B}) => `${B} ${Y}`),
+        ),
+      ),
+      ce('a', {
+        style: {
+          ...buttonStyle,
+          width: '32px',
+        },
+        onclick: calNext,
+      },
+        '\u276f',
+      ),
+    ),
+    ce('div', {style: {height: '48px'}}),
+    ce('table', {
+      style: {
+        borderCollapse: 'collapse',
+        textAlign: 'center',
+      },
+    },
+      ce('tr', {}, shortWeekdays.map((weekday, j) => ce('td', {style: {...tdStyle(j), paddingBottom: '4px'}}, weekday))),
+      range(numWeeks).map((i) => ce('tr', {}, range(7).map((j) => {
+        const calDate = newUtc(+start + (i * 7 + j) * MS_PER_DAY);
+        return ce('td', {
+          style: {
+            ...tdStyle(j),
+            padding: '0 8px',
+          },
+        },
+          ce('div', {
+            style: {
+              width: '100%',
+              aspectRatio: '1 / 1',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              ...dateify(calDate) === dateify(nowUtc) ? {outline: '1px solid white', borderRadius: '4px'} : {},
+              ...monthify(calDate) !== monthify(firstOfMonth) ? {color: '#888', outlineColor: '#888'} : {},
+            },
+          },
+            `${calDate.getUTCDate()}`,
+          ),
+        );
+      }))),
+    ),
+  ]);
+}
+
+window.onkeydown = (ev) => {
+  if (false);
+  else if (ev.code == 'ArrowLeft') {
+    calPrev?.();
+  }
+  else if (ev.code == 'ArrowRight') {
+    calNext?.();
+  }
+  else if (ev.code == 'Space') {
+    calReset?.();
+  }
+  else if (ev.code == 'ArrowUp') {
+    calYearPrev?.();
+  }
+  else if (ev.code == 'ArrowDown') {
+    calYearNext?.();
+  }
+};
+
+
+function update () {
+  const now = newLocal();
+  renderClock(now);
+  renderCal(now);
+  return now;
+}
+
+async function main () {
+  const n = 1000;
+  while (true) {
+    const now = update().getTime();
+    const next = Math.ceil(now / n) * n;
+    await new Promise(r => setTimeout(r, Math.max(0, next - now)));
+  }
+}
+
+main();
+
+</script>
+
+</body>
+</html>
